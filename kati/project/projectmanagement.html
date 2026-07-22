@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Drafting Board — Project Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F0EDE4;
+    --paper-line: #C9D6DE;
+    --ink: #1F2A37;
+    --ink-soft: #55636F;
+    --blueprint: #2B4C7E;
+    --blueprint-dark: #1B3255;
+    --amber: #C67C2E;
+    --sage: #6B8F71;
+    --card-bg: #FFFDF7;
+    --danger: #B5452F;
+    --radius: 3px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    margin:0;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    min-height:100vh;
+  }
+
+  h1,h2,h3, .display{
+    font-family:'Space Grotesk', sans-serif;
+  }
+
+  .mono{
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    background: var(--blueprint);
+    color:#fff;
+    padding: 18px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    border-bottom: 4px solid var(--blueprint-dark);
+  }
+
+  .topbar .brand{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+
+  .topbar h1{
+    font-size: 22px;
+    margin:0;
+    letter-spacing: 0.5px;
+  }
+
+  .topbar .tagline{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    opacity: 0.75;
+  }
+
+  .project-tabs{
+    display:flex;
+    gap:8px;
+    flex-wrap: wrap;
+    align-items:center;
+  }
+
+  .project-tab{
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.3);
+    color:#fff;
+    padding: 7px 14px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    font-size: 13px;
+    font-family:'IBM Plex Mono', monospace;
+    transition: background 0.15s ease;
+  }
+
+  .project-tab:hover{ background: rgba(255,255,255,0.18); }
+
+  .project-tab.active{
+    background:#fff;
+    color: var(--blueprint-dark);
+    font-weight: 600;
+    border-color:#fff;
+  }
+
+  .project-tab.add{
+    border-style: dashed;
+    opacity:0.85;
+  }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    max-width: 1180px;
+    margin: 24px auto 0;
+    padding: 0 28px;
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .search-input{
+    flex: 1 1 220px;
+    padding: 10px 14px;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    font-family:'Inter', sans-serif;
+    font-size: 14px;
+  }
+
+  .btn{
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color:#fff;
+    cursor:pointer;
+    font-family:'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .btn.secondary{
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .btn.danger{
+    background: var(--danger);
+    border-color: var(--danger);
+  }
+
+  .progress-wrap{
+    flex: 1 1 200px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .progress-track{
+    flex:1;
+    height: 10px;
+    background: #ddd6c4;
+    border: 1px solid var(--ink);
+    border-radius: 20px;
+    overflow:hidden;
+  }
+
+  .progress-fill{
+    height:100%;
+    background: var(--sage);
+    width:0%;
+    transition: width 0.25s ease;
+  }
+
+  .progress-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* ---------- Board ---------- */
+  .board{
+    max-width: 1180px;
+    margin: 20px auto 60px;
+    padding: 0 28px;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 860px){
+    .board{ grid-template-columns: 1fr; }
+  }
+
+  .lane{
+    background: rgba(255,255,255,0.35);
+    border: 1px solid var(--paper-line);
+    border-radius: var(--radius);
+    padding: 14px;
+    min-height: 200px;
+  }
+
+  .lane.drag-over{
+    outline: 2px dashed var(--blueprint);
+    outline-offset: -6px;
+  }
+
+  .lane-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .lane-header h2{
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin:0;
+  }
+
+  .lane-count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    background: var(--ink);
+    color:#fff;
+    border-radius: 20px;
+    padding: 2px 9px;
+  }
+
+  .lane[data-status="todo"] .lane-header{ border-color: var(--blueprint); }
+  .lane[data-status="in-progress"] .lane-header{ border-color: var(--amber); }
+  .lane[data-status="done"] .lane-header{ border-color: var(--sage); }
+
+  .empty-lane{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align:center;
+    padding: 30px 8px;
+    border: 1px dashed var(--paper-line);
+    border-radius: var(--radius);
+  }
+
+  /* ---------- Cards ---------- */
+  .card{
+    background: var(--card-bg);
+    border: 1px solid var(--ink);
+    border-left: 6px solid var(--ink-soft);
+    border-radius: var(--radius);
+    padding: 12px 12px 10px;
+    margin-bottom: 12px;
+    cursor: grab;
+    position: relative;
+    box-shadow: 2px 2px 0 rgba(31,42,55,0.08);
+    transition: transform 0.12s ease;
+  }
+
+  .card:hover{ transform: translateY(-2px) rotate(-0.3deg); }
+
+  .card.priority-high{ border-left-color: var(--danger); }
+  .card.priority-medium{ border-left-color: var(--amber); }
+  .card.priority-low{ border-left-color: var(--sage); }
+
+  .card .pin{
+    position:absolute;
+    top:-6px;
+    right: 10px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--amber);
+    border: 2px solid var(--card-bg);
+  }
+
+  .card h3{
+    font-size: 15px;
+    margin: 0 0 6px;
+    padding-right: 14px;
+  }
+
+  .card p{
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 10px;
+    line-height: 1.4;
+  }
+
+  .card-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+
+  .card-actions{
+    display:flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .card-actions button{
+    flex:1;
+    padding: 6px 8px;
+    font-size: 11px;
+    border-radius: var(--radius);
+    border: 1px solid var(--ink);
+    background: transparent;
+    cursor:pointer;
+    font-family:'Inter', sans-serif;
+  }
+
+  .card-actions button:hover{ background: var(--ink); color:#fff; }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position: fixed;
+    inset:0;
+    background: rgba(31,42,55,0.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 20px;
+    z-index: 50;
+  }
+
+  .modal-overlay.hidden{ display:none; }
+
+  .modal{
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 100%;
+    max-width: 420px;
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
+  }
+
+  .modal h2{
+    margin:0 0 4px;
+    font-size: 18px;
+  }
+
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    color: var(--ink-soft);
+  }
+
+  .field input, .field textarea, .field select{
+    width:100%;
+    padding: 9px 10px;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    font-family:'Inter', sans-serif;
+    font-size: 14px;
+  }
+
+  .field textarea{ resize: vertical; min-height: 60px; }
+
+  .modal-row{ display:flex; gap: 10px; }
+  .modal-row .field{ flex:1; }
+
+  .modal-actions{
+    display:flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+
+  .hint{
+    text-align:center;
+    color: var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    margin-top: -6px;
+  }
+</style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <h1>Drafting Board</h1>
+      <span class="tagline">// project management, blueprint style</span>
+    </div>
+    <div class="project-tabs" id="project-tabs"></div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <input type="text" id="search-input" class="search-input" placeholder="Search tasks by title or assignee…" />
+      <div class="progress-wrap">
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <span class="progress-label mono" id="progress-label">0%</span>
+      </div>
+      <button class="btn" id="open-add-task">+ New task</button>
+    </div>
+
+    <div class="board" id="board"></div>
+  </main>
+
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <form class="modal" id="task-form">
+      <h2 id="modal-title">New task</h2>
+      <input type="hidden" id="task-id" />
+
+      <div class="field">
+        <label for="task-title">Title</label>
+        <input type="text" id="task-title" required maxlength="80" placeholder="e.g. Draft client proposal" />
+      </div>
+
+      <div class="field">
+        <label for="task-desc">Description</label>
+        <textarea id="task-desc" maxlength="240" placeholder="Optional details…"></textarea>
+      </div>
+
+      <div class="modal-row">
+        <div class="field">
+          <label for="task-assignee">Assignee</label>
+          <input type="text" id="task-assignee" maxlength="40" placeholder="Name" />
+        </div>
+        <div class="field">
+          <label for="task-due">Due date</label>
+          <input type="date" id="task-due" />
+        </div>
+      </div>
+
+      <div class="modal-row">
+        <div class="field">
+          <label for="task-priority">Priority</label>
+          <select id="task-priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="task-status">Status</label>
+          <select id="task-status">
+            <option value="todo">To do</option>
+            <option value="in-progress">In progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="delete-task" style="display:none;">Delete</button>
+        <div style="flex:1"></div>
+        <button type="button" class="btn secondary" id="cancel-task">Cancel</button>
+        <button type="submit" class="btn">Save task</button>
+      </div>
+      <div class="hint">Drag any card between columns to change its status.</div>
+    </form>
+  </div>
+
+<script>
+  /* =========================================================
+     DATA MODEL
+     Everything lives in memory for this session — no backend,
+     no localStorage (artifacts can't use browser storage).
+     Each project owns its own list of tasks.
+     ========================================================= */
+  let projects = [
+    {
+      id: 'p1',
+      name: 'Website Relaunch',
+      tasks: [
+        { id: 't1', title: 'Audit current sitemap', description: 'List every existing page and flag what to keep.', assignee: 'Mara', due: '2026-07-10', priority: 'medium', status: 'done' },
+        { id: 't2', title: 'Design new homepage', description: 'Blueprint-themed layout, three concepts.', assignee: 'Theo', due: '2026-07-18', priority: 'high', status: 'in-progress' },
+        { id: 't3', title: 'Write launch announcement', description: '', assignee: 'Priya', due: '2026-07-22', priority: 'low', status: 'todo' }
+      ]
+    },
+    {
+      id: 'p2',
+      name: 'Mobile App v2',
+      tasks: [
+        { id: 't4', title: 'Fix onboarding crash', description: 'Reproduce on Android 13.', assignee: 'Sam', due: '2026-07-06', priority: 'high', status: 'todo' },
+        { id: 't5', title: 'User interviews', description: 'Five sessions, focus on navigation.', assignee: 'Mara', due: '2026-07-14', priority: 'medium', status: 'todo' }
+      ]
+    }
+  ];
+
+  let currentProjectId = projects[0].id;   // which project tab is active
+  let searchQuery = '';                     // current search box value
+  let editingTaskId = null;                 // task being edited, or null if creating new
+  let draggedTaskId = null;                 // task currently being dragged
+
+  const STATUSES = [
+    { key: 'todo', label: 'To do' },
+    { key: 'in-progress', label: 'In progress' },
+    { key: 'done', label: 'Done' }
+  ];
+
+  /* =========================================================
+     HELPERS
+     ========================================================= */
+  function getCurrentProject(){
+    return projects.find(p => p.id === currentProjectId);
+  }
+
+  function uid(prefix){
+    return prefix + '_' + Math.random().toString(36).slice(2, 9);
+  }
+
+  function formatDate(iso){
+    if (!iso) return 'no due date';
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+
+  /* =========================================================
+     RENDER: project tabs
+     ========================================================= */
+  function renderProjectTabs(){
+    const wrap = document.getElementById('project-tabs');
+    wrap.innerHTML = '';
+
+    projects.forEach(project => {
+      const tab = document.createElement('button');
+      tab.className = 'project-tab' + (project.id === currentProjectId ? ' active' : '');
+      tab.textContent = project.name;
+      tab.addEventListener('click', () => {
+        currentProjectId = project.id;
+        searchQuery = '';
+        document.getElementById('search-input').value = '';
+        renderAll();
+      });
+      wrap.appendChild(tab);
+    });
+
+    const addTab = document.createElement('button');
+    addTab.className = 'project-tab add';
+    addTab.textContent = '+ Project';
+    addTab.addEventListener('click', () => {
+      const name = prompt('Name this project:');
+      if (!name || !name.trim()) return;
+      const project = { id: uid('p'), name: name.trim(), tasks: [] };
+      projects.push(project);
+      currentProjectId = project.id;
+      renderAll();
+    });
+    wrap.appendChild(addTab);
+  }
+
+  /* =========================================================
+     RENDER: kanban board
+     ========================================================= */
+  function renderBoard(){
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+
+    const project = getCurrentProject();
+    const query = searchQuery.trim().toLowerCase();
+
+    STATUSES.forEach(statusInfo => {
+      const lane = document.createElement('div');
+      lane.className = 'lane';
+      lane.dataset.status = statusInfo.key;
+
+      const tasksInLane = project.tasks.filter(t => {
+        if (t.status !== statusInfo.key) return false;
+        if (!query) return true;
+        return t.title.toLowerCase().includes(query) ||
+               (t.assignee || '').toLowerCase().includes(query);
+      });
+
+      const header = document.createElement('div');
+      header.className = 'lane-header';
+      header.innerHTML = `<h2>${statusInfo.label}</h2><span class="lane-count mono">${tasksInLane.length}</span>`;
+      lane.appendChild(header);
+
+      if (tasksInLane.length === 0){
+        const empty = document.createElement('div');
+        empty.className = 'empty-lane';
+        empty.textContent = query ? 'No matches here.' : 'Nothing yet.';
+        lane.appendChild(empty);
+      } else {
+        tasksInLane.forEach(task => lane.appendChild(buildCard(task)));
+      }
+
+      // Drag-and-drop target behaviour for the whole lane
+      lane.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        lane.classList.add('drag-over');
+      });
+      lane.addEventListener('dragleave', () => lane.classList.remove('drag-over'));
+      lane.addEventListener('drop', (e) => {
+        e.preventDefault();
+        lane.classList.remove('drag-over');
+        if (draggedTaskId) moveTask(draggedTaskId, statusInfo.key);
+      });
+
+      board.appendChild(lane);
+    });
+  }
+
+  function buildCard(task){
+    const card = document.createElement('div');
+    card.className = `card priority-${task.priority}`;
+    card.draggable = true;
+
+    card.addEventListener('dragstart', () => {
+      draggedTaskId = task.id;
+      card.style.opacity = '0.4';
+    });
+    card.addEventListener('dragend', () => {
+      draggedTaskId = null;
+      card.style.opacity = '1';
+    });
+
+    card.innerHTML = `
+      <div class="pin"></div>
+      <h3>${escapeHtml(task.title)}</h3>
+      ${task.description ? `<p>${escapeHtml(task.description)}</p>` : ''}
+      <div class="card-meta">
+        <span>${task.assignee ? escapeHtml(task.assignee) : 'Unassigned'}</span>
+        <span>${formatDate(task.due)}</span>
+      </div>
+      <div class="card-actions">
+        <button type="button" data-action="edit">Edit</button>
+        <button type="button" data-action="advance">${nextStatusLabel(task.status)}</button>
+      </div>
+    `;
+
+    card.querySelector('[data-action="edit"]').addEventListener('click', () => openTaskModal(task.id));
+    const advanceBtn = card.querySelector('[data-action="advance"]');
+    if (advanceBtn) {
+      advanceBtn.addEventListener('click', () => {
+        const next = nextStatusKey(task.status);
+        if (next) moveTask(task.id, next);
+      });
+    }
+
+    return card;
+  }
+
+  function nextStatusKey(current){
+    const order = ['todo', 'in-progress', 'done'];
+    const idx = order.indexOf(current);
+    return idx >= 0 && idx < order.length - 1 ? order[idx + 1] : null;
+  }
+
+  function nextStatusLabel(current){
+    const next = nextStatusKey(current);
+    if (!next) return 'Complete ✓';
+    return next === 'in-progress' ? 'Start →' : 'Finish →';
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  /* =========================================================
+     RENDER: progress bar
+     ========================================================= */
+  function renderProgress(){
+    const project = getCurrentProject();
+    const total = project.tasks.length;
+    const done = project.tasks.filter(t => t.status === 'done').length;
+    const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = `${pct}% · ${done}/${total} done`;
+  }
+
+  function renderAll(){
+    renderProjectTabs();
+    renderBoard();
+    renderProgress();
+  }
+
+  /* =========================================================
+     TASK MUTATIONS
+     ========================================================= */
+  function moveTask(taskId, newStatus){
+    const project = getCurrentProject();
+    const task = project.tasks.find(t => t.id === taskId);
+    if (task) task.status = newStatus;
+    renderAll();
+  }
+
+  function deleteTask(taskId){
+    const project = getCurrentProject();
+    project.tasks = project.tasks.filter(t => t.id !== taskId);
+    renderAll();
+  }
+
+  function saveTaskFromForm(){
+    const project = getCurrentProject();
+
+    const data = {
+      title: document.getElementById('task-title').value.trim(),
+      description: document.getElementById('task-desc').value.trim(),
+      assignee: document.getElementById('task-assignee').value.trim(),
+      due: document.getElementById('task-due').value,
+      priority: document.getElementById('task-priority').value,
+      status: document.getElementById('task-status').value
+    };
+
+    if (!data.title) return;
+
+    if (editingTaskId){
+      const task = project.tasks.find(t => t.id === editingTaskId);
+      Object.assign(task, data);
+    } else {
+      project.tasks.push({ id: uid('t'), ...data });
+    }
+
+    closeModal();
+    renderAll();
+  }
+
+  /* =========================================================
+     MODAL CONTROL
+     ========================================================= */
+  function openTaskModal(taskId){
+    editingTaskId = taskId || null;
+    const overlay = document.getElementById('modal-overlay');
+    const form = document.getElementById('task-form');
+    form.reset();
+
+    if (editingTaskId){
+      const task = getCurrentProject().tasks.find(t => t.id === editingTaskId);
+      document.getElementById('modal-title').textContent = 'Edit task';
+      document.getElementById('task-title').value = task.title;
+      document.getElementById('task-desc').value = task.description || '';
+      document.getElementById('task-assignee').value = task.assignee || '';
+      document.getElementById('task-due').value = task.due || '';
+      document.getElementById('task-priority').value = task.priority;
+      document.getElementById('task-status').value = task.status;
+      document.getElementById('delete-task').style.display = 'block';
+    } else {
+      document.getElementById('modal-title').textContent = 'New task';
+      document.getElementById('delete-task').style.display = 'none';
+    }
+
+    overlay.classList.remove('hidden');
+    document.getElementById('task-title').focus();
+  }
+
+  function closeModal(){
+    document.getElementById('modal-overlay').classList.add('hidden');
+    editingTaskId = null;
+  }
+
+  /* =========================================================
+     EVENT WIRING (runs once on load)
+     ========================================================= */
+  document.getElementById('open-add-task').addEventListener('click', () => openTaskModal(null));
+  document.getElementById('cancel-task').addEventListener('click', closeModal);
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-overlay') closeModal();
+  });
+  document.getElementById('task-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveTaskFromForm();
+  });
+  document.getElementById('delete-task').addEventListener('click', () => {
+    if (editingTaskId && confirm('Delete this task?')){
+      deleteTask(editingTaskId);
+      closeModal();
+    }
+  });
+  document.getElementById('search-input').addEventListener('input', (e) => {
+    searchQuery = e.target.value;
+    renderBoard();
+  });
+
+  /* Initial paint */
+  renderAll();
+</script>
+</body>
+</html>

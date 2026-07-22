@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherSphere</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div id="background-overlay"></div>
+
+<div class="container">
+
+    <!-- ================= HEADER ================= -->
+
+    <header>
+
+        <div class="logo">
+
+            <i class="fa-solid fa-cloud-sun"></i>
+            <h1>WeatherSphere</h1>
+
+        </div>
+
+        <div class="header-buttons">
+
+            <button id="refreshBtn">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
+
+            <button id="themeBtn">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+
+        </div>
+
+    </header>
+
+    <!-- ================= SEARCH ================= -->
+
+    <section class="search">
+
+        <input
+        type="text"
+        id="searchInput"
+        placeholder="Search any city...">
+
+        <button id="searchBtn">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+    </section>
+
+    <!-- ================= LOCATION ================= -->
+
+    <section class="location-card card">
+
+        <div class="location-info">
+
+            <h2 id="city">
+                Detecting location...
+            </h2>
+
+            <p id="country">
+                ---
+            </p>
+
+            <p id="coordinates">
+                Latitude: --
+                Longitude: --
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- ================= CURRENT WEATHER ================= -->
+
+    <section class="weather-main card">
+
+        <div class="weather-icon">
+
+            <img
+            id="weatherIcon"
+            src=""
+            alt="Weather Icon">
+
+        </div>
+
+        <div class="weather-temp">
+
+            <h1 id="temperature">
+                --°
+            </h1>
+
+            <p id="weatherDescription">
+                Loading...
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- ================= WEATHER DETAILS ================= -->
+
+    <section class="details-grid">
+
+        <div class="detail card">
+
+            <i class="fa-solid fa-temperature-half"></i>
+
+            <h3>Feels Like</h3>
+
+            <p id="feelsLike">--°</p>
+
+        </div>
+
+        <div class="detail card">
+
+            <i class="fa-solid fa-droplet"></i>
+
+            <h3>Humidity</h3>
+
+            <p id="humidity">--%</p>
+
+        </div>
+
+        <div class="detail card">
+
+            <i class="fa-solid fa-wind"></i>
+
+            <h3>Wind</h3>
+
+            <p id="windSpeed">-- km/h</p>
+
+        </div>
+
+        <div class="detail card">
+
+            <i class="fa-solid fa-compass"></i>
+
+            <h3>Direction</h3>
+
+            <p id="windDirection">--°</p>
+
+        </div>
+
+        <div class="detail card">
+
+            <i class="fa-solid fa-gauge-high"></i>
+
+            <h3>Pressure</h3>
+
+            <p id="pressure">----</p>
+
+        </div>
+
+        <div class="detail card">
+
+            <i class="fa-solid fa-eye"></i>
+
+            <h3>Visibility</h3>
+
+            <p id="visibility">----</p>
+
+        </div>
+
+        <div class="detail card">
+
+            <i class="fa-solid fa-cloud"></i>
+
+            <h3>Clouds</h3>
+
+            <p id="clouds">--%</p>
+
+        </div>
+
+        <div class="detail card">
+
+            <i class="fa-solid fa-sun"></i>
+
+            <h3>UV Index</h3>
+
+            <p id="uvIndex">--</p>
+
+        </div>
+
+    </section>
+
+    <!-- ================= SUN ================= -->
+
+    <section class="sun-grid">
+
+        <div class="card">
+
+            <h2>
+
+                <i class="fa-solid fa-sun"></i>
+
+                Sunrise
+
+            </h2>
+
+            <p id="sunrise">
+                --
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h2>
+
+                <i class="fa-solid fa-moon"></i>
+
+                Sunset
+
+            </h2>
+
+            <p id="sunset">
+                --
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- ================= AIR QUALITY ================= -->
+
+    <section class="air-quality card">
+
+        <h2>
+
+            <i class="fa-solid fa-leaf"></i>
+
+            Air Quality
+
+        </h2>
+
+        <div class="aq-grid">
+
+            <div>
+
+                AQI
+
+                <span id="aqi">--</span>
+
+            </div>
+
+            <div>
+
+                PM2.5
+
+                <span id="pm25">--</span>
+
+            </div>
+
+            <div>
+
+                PM10
+
+                <span id="pm10">--</span>
+
+            </div>
+
+            <div>
+
+                CO
+
+                <span id="co">--</span>
+
+            </div>
+
+            <div>
+
+                NO₂
+
+                <span id="no2">--</span>
+
+            </div>
+
+            <div>
+
+                O₃
+
+                <span id="o3">--</span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= WIND COMPASS ================= -->
+
+    <section class="wind-compass card">
+
+        <h2>
+
+            <i class="fa-solid fa-location-arrow"></i>
+
+            Wind Compass
+
+        </h2>
+
+        <div id="compass">
+
+            <div id="needle"></div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= CLOCK ================= -->
+
+    <section class="clock card">
+
+        <h2>
+
+            <i class="fa-solid fa-clock"></i>
+
+            Local Time
+
+        </h2>
+
+        <h1 id="clock">
+
+            --:--:--
+
+        </h1>
+
+        <p id="date">
+
+            Loading...
+
+        </p>
+
+    </section>
+
+    <!-- ================= HOURLY FORECAST ================= -->
+
+    <section class="forecast card">
+
+        <h2>
+
+            Hourly Forecast
+
+        </h2>
+
+        <div id="hourlyForecast"
+        class="forecast-scroll">
+
+        </div>
+
+    </section>
+
+    <!-- ================= 7 DAY ================= -->
+
+    <section class="forecast card">
+
+        <h2>
+
+            7-Day Forecast
+
+        </h2>
+
+        <div id="weeklyForecast"
+        class="week-grid">
+
+        </div>
+
+    </section>
+
+    <!-- ================= EXTRA ================= -->
+
+    <section class="extra-grid">
+
+        <div class="card">
+
+            <h3>Chance of Rain</h3>
+
+            <p id="rainChance">--%</p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Moon Phase</h3>
+
+            <p id="moonPhase">---</p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Timezone</h3>
+
+            <p id="timezone">---</p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Last Updated</h3>
+
+            <p id="lastUpdated">--</p>
+
+        </div>
+
+    </section>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
