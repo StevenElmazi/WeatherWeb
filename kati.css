@@ -1121,6 +1121,62 @@ img{
 
 }
 /* ==========================================================
+   FORECAST STYLES
+========================================================== */
+
+.forecast-scroll{
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    padding-bottom:6px;
+}
+
+.forecast-item{
+    min-width:96px;
+    padding:12px;
+    border-radius:16px;
+    background:rgba(255,255,255,.12);
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    align-items:center;
+}
+
+.forecast-item img,
+.forecast-day img{
+    width:44px;
+    height:44px;
+}
+
+.week-grid{
+    display:grid;
+    grid-template-columns:repeat(7, minmax(90px, 1fr));
+    gap:12px;
+}
+
+.forecast-day{
+    padding:12px;
+    border-radius:16px;
+    background:rgba(255,255,255,.12);
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    align-items:center;
+}
+
+.forecast-day strong{
+    color:#ffd166;
+}
+
+.forecast-day span{
+    display:block;
+    opacity:.8;
+    font-size:.9rem;
+}
+
+/* ==========================================================
    PART 2A.2b.1
    WEATHER DETAILS GRID
 ========================================================== */
