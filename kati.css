@@ -642,6 +642,36 @@ img{
 }
 
 /* ===============================
+   LOCATION BUTTON
+================================= */
+
+.location-btn{
+    margin-top: 8px;
+    width: fit-content;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(255,255,255,.18);
+    color: white;
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: .3s;
+}
+
+.location-btn:hover{
+    background: rgba(255,255,255,.28);
+    transform: translateY(-2px);
+}
+
+.location-btn i{
+    color: #ffd166;
+}
+
+/* ===============================
    MAIN WEATHER CARD
 ================================= */
 
